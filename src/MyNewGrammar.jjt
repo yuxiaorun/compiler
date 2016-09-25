@@ -1,0 +1,102 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */options{  static = false;}PARSER_BEGIN(A)
+public class A{  public static void main(String args []) throws ParseException  {    A parser = new A(System.in);    while (true)    {      System.out.println("Reading from standard input...");      System.out.print("Enter an expression like \"1+(2+3)*4;\" :");      try      {        switch (A.program())        {          case 0 :           System.out.println("OK.");          break;          case 1 :           System.out.println("Goodbye.");          break;          default :           break;        }      }      catch (Exception e)      {        System.out.println("NOK.");        System.out.println(e.getMessage());        A.ReInit(System.in);      }      catch (Error e)      {        System.out.println("Oops.");        System.out.println(e.getMessage());        break;      }    }  }}PARSER_END(A)SKIP :{  " "| "\r"| "\t"| "\n"
+| < "/*"(~["*"])*"*"(~["/"](~["*"])*"*")*"/">}TOKEN : /* OPERATORS */{  < PLUS : "+" >| < MINUS : "-" >| < MULTIPLY : "*" >| < DIVIDE : "/" >
+| < ASSIGN:"=">
+|  < EQ : "==">
+| < LT : "<">
+| < NEQ : "<>">}
+TOKEN : /*SYMBOLS*/
+{
+  < UNDERLINE : "_">
+| < COMMA:",">
+| < SEMICOLON:";">
+| < COLON:":">
+| < LPARENT: "(" >
+| < RPARENT: ")" >
+| < LBRACE : "{" >
+| < RBRACE : "}" >
+| < LARRAY : "[" >
+| < RARRAY : "]" >
+
+}TOKEN :
+{
+
+ < IF:"if" >
+|<ELSE: "else" >
+|<WHILE: "while" >
+|<READ:"read" >
+|< WRITE:"write" >
+|< INT:"int" >
+|<REAL: "real" >
+|<IDENTIFIER:<LETTER>
+ | <LETTER>(<LETTER>
+ | <DIGIT>
+ | <UNDERLINE>)*(<LETTER>
+ | <DIGIT>)+>
+ | <#LETTER:["a"-"z", "A"-"Z"]>
+}
+TOKEN :{  < CONSTANT : (< DIGIT >)+ >| < #DIGIT : [ "0"-"9" ] >}
+
+void block():
+{}
+{
+< LBRACE>statement() ((< SEMICOLON >)[statement()])*< RBRACE>
+}
+
+void simple():
+{}
+{
+  expr()
+}
+void VariableDeclaration ():
+{}
+{
+(   (      < INT>|< REAL>
+      )[< LARRAY >< RARRAY>]
+    )
+    < IDENTIFIER>(< COMMA>identifier())*
+ }
+ void VariableAssign():
+ {} {
+< IDENTIFIER>< ASSIGN>expr()
+   }
+
+void statement():
+{}
+{  <IF><LPARENT > expr()< RPARENT>
+[block()]
+[< ELSE> block()]
+|< WHILE> <LPARENT > expr()< RPARENT>
+[block()]
+| VariableDeclaration()
+| VariableAssign()
+}
+int program():
+{}
+{
+  statement()[";"]
+  {
+return 0;
+    }
+ }
+ void expr():
+{}
+{
+  sum() (
+   (
+  <EQ>
+| <LT>
+| <NEQ>
+)
+sum()
+  )*
+}
+void sum() :{}{  term()  (    (      < PLUS >    | < MINUS >    )    term()  )*}void term() :{}{  unary()  (    (      < MULTIPLY >    | < DIVIDE >    )    unary()  )*}void unary() :{}{  < MINUS > element()| element()}void element() :{}{  < CONSTANT >| "(" sum() ")"
+| identifier()}
+void identifier():
+{}
+{
+< IDENTIFIER>[< LARRAY>< CONSTANT>< RARRAY>]
+}
